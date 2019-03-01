@@ -4,6 +4,7 @@ var passport = require("passport");
 var LocalStrategy = require("passport-local").Strategy;
 const { check, validationResult } = require("express-validator/check");
 var User = require("../model/user.js");
+var Room = require("../model/room.js");
 var crypto = require("crypto");
 
 passport.use(
@@ -33,18 +34,21 @@ passport.deserializeUser(function(user, done) {
 
 /* Account routes */
 router.get("/", function(req, res, next) {
-  req.getConnection((err, con) => {
-    if (err) return next(err);
-    con.query("select * from users;", (err, results) => {
-      if (err) return next(err);
-      res.send(results);
-    });
-  });
+  if (req.user) {
+    res.render("account", { username: req.user.username });
+  } else {
+  res.redirect("/account/login");
+  }
 });
 
 //login form
 router.get("/login", function(req, res, next) {
-  res.render("login", { message: req.flash('message') });
+  if (req.user) {
+    res.redirect("/");
+  } else {
+    res.render("login");
+  }
+  
 });
 
 //login user
@@ -117,11 +121,12 @@ router.post(
 
 //chat page
 router.get("/chat", function(req, res, next) {
-  if (req.user) {
-    res.render("chat", { username: req.user.username });
-  } else {
-  res.redirect("/account/login");
-  }
+ // if (req.user) {
+    res.render("chat", { username: 'name'/*req.user.username*/ });
+  // } else {
+  // res.redirect("/account/login");
+  // }
 });
+
 
 module.exports = router;

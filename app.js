@@ -44,8 +44,10 @@ app.use(passport.session());
 
 var indexRouter = require("./routes/index");
 var accountRouter = require("./routes/account");
+var roomRouter = require("./routes/rooms");
 app.use("/", indexRouter);
 app.use("/account", accountRouter);
+app.use("/rooms", roomRouter);
 
 
 // catch 404 and forward to error handler

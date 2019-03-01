@@ -12,3 +12,12 @@ document.getElementById('send').addEventListener('click', function() {
 socket.on('chat', (chat) => {
     document.getElementById('chat-window').innerHTML += '<br>' + chat.nick + ': ' + chat.message;
 });
+
+
+axios.get('/rooms').then( rooms => {
+    
+    for (var i = 0; i < rooms.data.length; i++){
+        document.getElementById('rooms').innerHTML += rooms.data[i].name + "<br>";
+    }
+}
+);
