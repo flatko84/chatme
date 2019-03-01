@@ -119,14 +119,5 @@ router.post(
   }
 );
 
-//chat page
-router.get("/chat", function(req, res, next) {
- // if (req.user) {
-    res.render("chat", { username: 'name'/*req.user.username*/ });
-  // } else {
-  // res.redirect("/account/login");
-  // }
-});
-
 
 module.exports = router;

@@ -14,10 +14,9 @@ socket.on('chat', (chat) => {
 });
 
 
-axios.get('/rooms').then( rooms => {
+// axios.get('/rooms').then( rooms => {
     
-    for (var i = 0; i < rooms.data.length; i++){
-        document.getElementById('rooms').innerHTML += rooms.data[i].name + "<br>";
-    }
-}
-);
+//     for (var i = 0; i < rooms.data.length; i++){
+//         document.getElementById('rooms').innerHTML += rooms.data[i].name + "<br>";
+//     }
+// });
