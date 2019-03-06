@@ -5,12 +5,9 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var session = require("express-session");
-var Store = require("express-session").Store;
 var bodyParser = require("body-parser");
 var passport = require("passport");
-
-
-
+var expSess = require("./session.js");
 var mustacheExpress = require('mustache-express');
 
 // Start Express
@@ -33,11 +30,10 @@ app.use(flash());
 //passport settings
 
 app.use(express.static("public"));
-app.use(session({ secret: "cats", resave: true, saveUninitialized: true }));
+app.use(expSess);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 
 //Router
