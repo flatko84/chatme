@@ -1,15 +1,22 @@
+<!DOCTYPE html>
 <html>
-<head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
-<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-<meta charset="utf-8">
-</head>
-<body>
-<h2>Welcome, {{ username }}</h2><a href="/account/logout">Logout</a>
-
-</div>
-Rooms:
-
-
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+      href="stylesheets/style.css"
+    />
+  </head>
+  <body>
+    <div id="app">
+    <h2>Welcome, {{ username }} </h2>
+      <rooms-component></rooms-component>
+    </div>
+    <script src="javascripts/app.js"></script>
+  </body>
 </html>

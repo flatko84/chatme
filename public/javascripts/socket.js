@@ -19,7 +19,7 @@ socket.on('connect', () => {
 });
 socket.on('users', users => {
     document.getElementById('users').innerHTML = '';
-    var usernames = Object.keys(users.users);
+    var usernames = Object.keys(users);
     for (i=0;i<usernames.length;i++){
     document.getElementById('users').innerHTML += usernames[i] + "<br>";
     }

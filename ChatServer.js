@@ -17,7 +17,7 @@ function ChatServer(server) {
     //   socket.disconnect(true);
     // });
 
-    //on joining room
+    //on joining room - to do - sanitize input room name - not blank and allowed characters
     socket.on("join", roomName => {
       //if logged
       if (socket.handshake.session.hasOwnProperty("passport")) {
@@ -34,11 +34,9 @@ function ChatServer(server) {
           socket.handshake.session.passport.user.username;
       
       socket.join(roomName);
-
+        console.log(rooms);
       //send users list to all users
-      io.sockets.in(roomName).emit("users", {
-        users: rooms[roomName]
-      });
+      io.sockets.in(roomName).emit("users", rooms[roomName]);
     }
     });
 
@@ -52,9 +50,7 @@ function ChatServer(server) {
           delete rooms[roomName];
          };
          //send rooms and users list to coresponding peers
-      io.sockets.in(roomName).emit("users", {
-        users: rooms[roomName]
-      });
+      io.sockets.in(roomName).emit("users", rooms[roomName]);
       io.sockets.emit('rooms', Object.keys(rooms));
        }
     });

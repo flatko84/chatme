@@ -14,6 +14,7 @@ router.get("/", function(req, res, next) {
   }
 });
 
+//creates new room or joins if created
 router.get("/:id", function(req, res, next) {
   if (req.user) {
     res.render("room", {
