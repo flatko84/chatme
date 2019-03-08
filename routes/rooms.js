@@ -14,30 +14,6 @@ router.get("/", function(req, res, next) {
   }
 });
 
-//creates new room or joins if created
-router.get("/:id", function(req, res, next) {
-  if (req.user) {
-    res.render("room", {
-      roomName: req.params.id,
-      token: "",
-      username: req.user.username
-    });
-  } else {
-    res.redirect("/account/login");
-  }
-});
 
-//TO DO - delete from user_room when leaving page on frontend
-router.delete("/:id", function(req, res, next) {
-  if (req.user) {
-    Room.findOne({ where: { open: "1", room_id: req.params.id } }).then(
-      room => {
-        res.render("room", { room: room, username: req.user.username });
-      }
-    );
-  } else {
-    res.send({});
-  }
-});
 
 module.exports = router;

@@ -7,7 +7,7 @@
 <div v-for="message in messages" v-bind:key="message">{{ message.user }}: {{ message.message }}</div>
 
 </div>
-    <input type="text" v-model="newMessage"><input type="button" @click="sendMessage" value="Send"></td><td>
+    <div id="message-bar"><input type="text" v-model="newMessage"><input type="button" @click="sendMessage" value="Send"></div></td><td>
 <div v-for="user in users" v-bind:key="user">{{ user }}</div></td></tr>
     </table>
 

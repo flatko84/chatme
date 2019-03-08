@@ -9,8 +9,9 @@ a {
 
 
 
-table, td, tr {
+table, td {
   vertical-align: bottom;
+  border: 1px solid black;
 
 }
 
