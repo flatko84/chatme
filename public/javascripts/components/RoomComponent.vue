@@ -1,6 +1,7 @@
 <template>
 <div>
-    <table id="main-space">
+    <table class="chatroom">
+        
         <tr><td>
     <div id="feed">
 <div v-for="message in messages" v-bind:key="message">{{ message.user }}: {{ message.message }}</div>
@@ -25,10 +26,14 @@ module.exports = {
     },
     sockets: {
         users: function (usr) {
-            this.users = usr;
+            if (usr.room == this.roomname){
+            this.users = usr.users;
+            }
         },
         chat: function (chat) {
-            this.messages.push(chat);
+            if (chat.room == this.roomname) {
+            this.messages.push({user: chat.user, message: chat.message});
+            }
         }
     },
     methods: {

@@ -12,11 +12,9 @@ function ChatServer(server) {
   io.on("connection", socket => {
     console.log("Socket N:" + socket.id);
 
-    //not working??
-    // socket.on('disconnect', () => {
-    //   socket.disconnect(true);
-    // });
-
+    socket.on('getRooms', () => {
+    io.to(`${socket.id}`).emit('rooms', Object.keys(rooms));
+    })
     //on joining room - to do - sanitize input room name - not blank and allowed characters
     socket.on("join", roomName => {
       //if logged
@@ -34,23 +32,22 @@ function ChatServer(server) {
           socket.handshake.session.passport.user.username;
       
       socket.join(roomName);
-        console.log(rooms);
       //send users list to all users
-      io.sockets.in(roomName).emit("users", rooms[roomName]);
+      io.sockets.in(roomName).emit("users", {users: rooms[roomName], room: roomName});
     }
     });
 
     //on leaving room
     socket.on("leave", (roomName) => {
        //if logged
-       if (socket.handshake.session.hasOwnProperty("passport")) {
+       if (socket.handshake.session.hasOwnProperty("passport") && roomName !== 'undefined') {
          //delete user from room and delete the room if empty
          delete rooms[roomName][socket.handshake.session.passport.user.username];
          if (Object.keys(rooms[roomName]).length === 0){
           delete rooms[roomName];
          };
          //send rooms and users list to coresponding peers
-      io.sockets.in(roomName).emit("users", rooms[roomName]);
+      io.sockets.in(roomName).emit("users", {users: rooms[roomName], room: roomName});
       io.sockets.emit('rooms', Object.keys(rooms));
        }
     });
@@ -63,7 +60,8 @@ function ChatServer(server) {
         //send message to the chat room
         io.sockets.in(chat.roomName).emit("chat", {
           user: socket.handshake.session.passport.user.username,
-          message: chat.message
+          message: chat.message,
+          room: chat.roomName
         });
       }
     });
