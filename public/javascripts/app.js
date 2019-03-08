@@ -20711,7 +20711,9 @@ module.exports = {
   },
   methods: {
     newRoom() {
+      if (!this.joined.includes(this.createRoomName)){
       this.joined.push(this.createRoomName);
+      }
       this.sel = this.createRoomName;
       this.createRoomName = "";
     },
