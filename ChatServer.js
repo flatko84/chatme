@@ -64,8 +64,10 @@ function ChatServer(server) {
         socket.on("leave", roomName => {
         Room.findOne({ where: { name: roomName } }).then( room => {
             user.removeRoom(room).then(() => {
-              
               room.getUsers().then(users => {
+                if (users.length == 0){
+                  room.destroy();
+                }
                 //join room
                 socket.join(roomName);
                 //send users list to all users
