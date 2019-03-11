@@ -2,6 +2,7 @@ var socket = require("socket.io");
 var ios = require("socket.io-express-session");
 var expSess = require("./session.js");
 var ev = require("./events.js");
+var Room = require('./model/room.js');
 
 function ChatServer(server) {
 

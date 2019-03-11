@@ -1,8 +1,9 @@
 const Sequelize = require("sequelize");
-const sequelize = new Sequelize("chatme", "root", "c23q4wxC23Q4WX", {
-  dialect: "mysql",
-  host: "localhost",
-  port: 3306
+const db = require('./db.js');
+const sequelize = new Sequelize(db.database, db.username, db.password, {
+  dialect: db.dialect,
+  host: db.host,
+  port: db.port
 });
 
 const User = sequelize.define(
