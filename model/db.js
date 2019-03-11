@@ -1,3 +1,5 @@
+const Sequelize = require("sequelize");
+
 const db = {
   database: "chatme",
   username: "root",
@@ -7,4 +9,10 @@ const db = {
   port: 3306
 }
 
-module.exports = db;
+const sequelize = new Sequelize(db.database, db.username, db.password, {
+  dialect: db.dialect,
+  host: db.host,
+  port: db.port
+});
+
+module.exports = sequelize;

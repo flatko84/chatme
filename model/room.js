@@ -1,15 +1,10 @@
 const Sequelize = require("sequelize");
-const db = require('./db.js');
-const sequelize = new Sequelize(db.database, db.username, db.password, {
-  dialect: db.dialect,
-  host: db.host,
-  port: db.port
-});
+const sequelize = require('./db.js');
 
 const Room = sequelize.define(
   "rooms",
   {
-    room_id: { type: Sequelize.INTEGER, primaryKey: true },
+    room_id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
     name: Sequelize.TEXT,
     open: Sequelize.BOOLEAN
   },
