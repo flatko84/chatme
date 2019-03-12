@@ -28,6 +28,7 @@
 
 <script>
 module.exports = {
+  //rooms = all rooms, joined = all joined rooms by the user, sel = room currently selected for chat
   data() {
     return {
       rooms: [],

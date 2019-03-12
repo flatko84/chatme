@@ -24,6 +24,7 @@
 
 <script>
 module.exports = {
+    //users = all users in the room, messages = all messages sent to the room, newMessage = message field
   props: ["roomname"],
   data() {
     return {

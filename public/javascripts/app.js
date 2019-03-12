@@ -20633,6 +20633,7 @@ if (process.env.NODE_ENV === 'production') {
 //
 
 module.exports = {
+    //users = all users in the room, messages = all messages sent to the room, newMessage = message field
   props: ["roomname"],
   data() {
     return {
@@ -20715,6 +20716,7 @@ if (module.hot) {(function () {  var hotAPI = require("vue-hot-reload-api")
 //
 
 module.exports = {
+  //rooms = all rooms, joined = all joined rooms by the user, sel = room currently selected for chat
   data() {
     return {
       rooms: [],

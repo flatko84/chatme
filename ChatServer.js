@@ -34,21 +34,22 @@ function ChatServer(server) {
 
         //on joining room - to do - sanitize input room name - not blank and allowed characters
         socket.on("join", roomName => {
-          //if room doesn't exist
+          //create room if not present
           Room.findOrCreate({ where: { name: roomName } }).spread(
             (room, created) => {
+              //add user to room
               user.addRoom(room).then(() => {
                 room.getUsers().then(users => {
-                  //join room
+                  //join socket to room
                   socket.join(roomName);
-                  //send users list to all users
 
+                  //send users list to room users
                   io.sockets.in(roomName).emit("users", {
                     users: users.map(a => a.username),
                     room: roomName
                   });
 
-                  //emit and save rooms
+                  //emit rooms to all
                   Room.findAll().then(rooms => {
                     io.of("/").emit("rooms", rooms.map(a => a.name));
                   });
@@ -60,23 +61,24 @@ function ChatServer(server) {
 
         //on leaving room
         socket.on("leave", roomName => {
+          //get the room
           Room.findOne({ where: { name: roomName } }).then(room => {
+            //remove user from room
             user.removeRoom(room).then(() => {
+              //leave room from socket
               socket.leave(roomName);
               room.getUsers().then(users => {
-                //leave room
-                socket.leave(roomName);
                 //delete room if no users are left
                 if (users.length == 0) {
                   room.destroy();
                 }
-                //send users list to all users
+                //send users list to room users
 
                 io.sockets.in(roomName).emit("users", {
                   users: users.map(a => a.username),
                   room: roomName
                 });
-                //emit and save rooms
+                //emit rooms to all
                 Room.findAll().then(rooms => {
                   io.of("/").emit("rooms", rooms.map(a => a.name));
                 });
