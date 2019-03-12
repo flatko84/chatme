@@ -19,7 +19,6 @@ function ChatServer(server) {
       User.findOne({
         where: { username: socket.handshake.session.passport.user.username }
       }).then(user => {
-
         //send rooms and joined rooms list on loading page
         socket.on("getRooms", () => {
           Room.findAll()
@@ -44,12 +43,10 @@ function ChatServer(server) {
                   socket.join(roomName);
                   //send users list to all users
 
-                  io.sockets
-                    .in(roomName)
-                    .emit("users", {
-                      users: users.map(a => a.username),
-                      room: roomName
-                    });
+                  io.sockets.in(roomName).emit("users", {
+                    users: users.map(a => a.username),
+                    room: roomName
+                  });
 
                   //emit and save rooms
                   Room.findAll().then(rooms => {
@@ -67,24 +64,22 @@ function ChatServer(server) {
             user.removeRoom(room).then(() => {
               socket.leave(roomName);
               room.getUsers().then(users => {
+                //leave room
+                socket.leave(roomName);
+                //delete room if no users are left
                 if (users.length == 0) {
                   room.destroy();
                 }
-                io.sockets
-                  .in(roomName)
-                  .emit("users", {
-                    users: users.map(a => a.username),
-                    room: roomName
-                  });
+                //send users list to all users
+
+                io.sockets.in(roomName).emit("users", {
+                  users: users.map(a => a.username),
+                  room: roomName
+                });
                 //emit and save rooms
                 Room.findAll().then(rooms => {
                   io.of("/").emit("rooms", rooms.map(a => a.name));
                 });
-                //leave room
-                socket.leave(roomName);
-                //send users list to all users
-
-                
               });
             });
           });
