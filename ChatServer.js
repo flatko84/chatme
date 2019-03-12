@@ -27,7 +27,16 @@ function ChatServer(server) {
               roomnames.push(rooms[i].name);
             }
             io.to(`${socket.id}`).emit("rooms", roomnames);
-          });
+          }).then(
+            user.getRooms().then(rooms => {
+              let joinnames = [];
+              for (let i=0; i<rooms.length; i++){
+                joinnames.push(rooms[i].name);
+              };
+              io.to(`${socket.id}`).emit("joined", joinnames);
+              console.log(joinnames);
+            })
+          );
         });
         //on joining room - to do - sanitize input room name - not blank and allowed characters
         socket.on("join", roomName => {
@@ -53,7 +62,8 @@ function ChatServer(server) {
                     for (let i = 0; i < rooms.length; i++) {
                       roomnames.push(rooms[i].name);
                     }
-                    io.to(`${socket.id}`).emit("rooms", roomnames);
+                    io.of('/').emit("rooms", roomnames);
+                    
                   });
                 });
               });
@@ -64,12 +74,21 @@ function ChatServer(server) {
         socket.on("leave", roomName => {
         Room.findOne({ where: { name: roomName } }).then( room => {
             user.removeRoom(room).then(() => {
+              socket.leave(roomName);
               room.getUsers().then(users => {
                 if (users.length == 0){
                   room.destroy();
                 }
-                //join room
-                socket.join(roomName);
+                //emit and save rooms
+                Room.findAll().then(rooms => {
+                  let roomnames = [];
+                  for (let i = 0; i < rooms.length; i++) {
+                    roomnames.push(rooms[i].name);
+                  }
+                  io.of('/').emit("rooms", roomnames);
+                });
+                //leave room
+                socket.leave(roomName);
                 //send users list to all users
                 let usernames = [];
                 for (let i = 0; i < users.length; i++) {
@@ -79,14 +98,7 @@ function ChatServer(server) {
                   .in(roomName)
                   .emit("users", { users: usernames, room: roomName });
 
-                //emit and save rooms
-                Room.findAll().then(rooms => {
-                  let roomnames = [];
-                  for (let i = 0; i < rooms.length; i++) {
-                    roomnames.push(rooms[i].name);
-                  }
-                  io.to(`${socket.id}`).emit("rooms", roomnames);
-                });
+                
               });
             });
           
