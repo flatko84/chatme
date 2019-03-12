@@ -19,6 +19,7 @@ function ChatServer(server) {
       User.findOne({
         where: { username: socket.handshake.session.passport.user.username }
       }).then(user => {
+
         //send rooms and joined rooms list on loading page
         socket.on("getRooms", () => {
           Room.findAll()
@@ -31,6 +32,7 @@ function ChatServer(server) {
               })
             );
         });
+
         //on joining room - to do - sanitize input room name - not blank and allowed characters
         socket.on("join", roomName => {
           //if room doesn't exist
@@ -58,6 +60,7 @@ function ChatServer(server) {
             }
           );
         });
+
         //on leaving room
         socket.on("leave", roomName => {
           Room.findOne({ where: { name: roomName } }).then(room => {
@@ -67,6 +70,12 @@ function ChatServer(server) {
                 if (users.length == 0) {
                   room.destroy();
                 }
+                io.sockets
+                  .in(roomName)
+                  .emit("users", {
+                    users: users.map(a => a.username),
+                    room: roomName
+                  });
                 //emit and save rooms
                 Room.findAll().then(rooms => {
                   io.of("/").emit("rooms", rooms.map(a => a.name));
@@ -75,12 +84,7 @@ function ChatServer(server) {
                 socket.leave(roomName);
                 //send users list to all users
 
-                io.sockets
-                  .in(roomName)
-                  .emit("users", {
-                    users: users.map(a => a.username),
-                    room: roomName
-                  });
+                
               });
             });
           });
