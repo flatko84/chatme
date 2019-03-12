@@ -10,4 +10,4 @@ When a room is left with no users, it's automatically deleted.
 Frontend - Vue.JS. Rooms are listed in RoomsComponent, click to join, X to leave, curently selected room in bold.
 RoomComponent contains the actual chat window.
 
-Still not implemented - Validate / sanitize input - room names and messages, Change password page, Private messages, SQL records for storing rooms and users on logout / Node restart, maybe storing chat history in SQL.
+Still not implemented - Validate / sanitize input - room names and messages, Change password page, Private messages
