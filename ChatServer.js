@@ -19,24 +19,17 @@ function ChatServer(server) {
       User.findOne({
         where: { username: socket.handshake.session.passport.user.username }
       }).then(user => {
-        //send rooms list on loading page
+        //send rooms and joined rooms list on loading page
         socket.on("getRooms", () => {
-          Room.findAll().then(rooms => {
-            let roomnames = [];
-            for (let i = 0; i < rooms.length; i++) {
-              roomnames.push(rooms[i].name);
-            }
-            io.to(`${socket.id}`).emit("rooms", roomnames);
-          }).then(
-            user.getRooms().then(rooms => {
-              let joinnames = [];
-              for (let i=0; i<rooms.length; i++){
-                joinnames.push(rooms[i].name);
-              };
-              io.to(`${socket.id}`).emit("joined", joinnames);
-              console.log(joinnames);
+          Room.findAll()
+            .then(rooms => {
+              io.to(`${socket.id}`).emit("rooms", rooms.map(a => a.name));
             })
-          );
+            .then(
+              user.getRooms().then(rooms => {
+                io.to(`${socket.id}`).emit("joined", rooms.map(a => a.name));
+              })
+            );
         });
         //on joining room - to do - sanitize input room name - not blank and allowed characters
         socket.on("join", roomName => {
@@ -48,22 +41,17 @@ function ChatServer(server) {
                   //join room
                   socket.join(roomName);
                   //send users list to all users
-                  let usernames = [];
-                  for (let i = 0; i < users.length; i++) {
-                    usernames.push(users[i].username);
-                  }
+
                   io.sockets
                     .in(roomName)
-                    .emit("users", { users: usernames, room: roomName });
+                    .emit("users", {
+                      users: users.map(a => a.username),
+                      room: roomName
+                    });
 
                   //emit and save rooms
                   Room.findAll().then(rooms => {
-                    let roomnames = [];
-                    for (let i = 0; i < rooms.length; i++) {
-                      roomnames.push(rooms[i].name);
-                    }
-                    io.of('/').emit("rooms", roomnames);
-                    
+                    io.of("/").emit("rooms", rooms.map(a => a.name));
                   });
                 });
               });
@@ -72,38 +60,31 @@ function ChatServer(server) {
         });
         //on leaving room
         socket.on("leave", roomName => {
-        Room.findOne({ where: { name: roomName } }).then( room => {
+          Room.findOne({ where: { name: roomName } }).then(room => {
             user.removeRoom(room).then(() => {
               socket.leave(roomName);
               room.getUsers().then(users => {
-                if (users.length == 0){
+                if (users.length == 0) {
                   room.destroy();
                 }
                 //emit and save rooms
                 Room.findAll().then(rooms => {
-                  let roomnames = [];
-                  for (let i = 0; i < rooms.length; i++) {
-                    roomnames.push(rooms[i].name);
-                  }
-                  io.of('/').emit("rooms", roomnames);
+                  io.of("/").emit("rooms", rooms.map(a => a.name));
                 });
                 //leave room
                 socket.leave(roomName);
                 //send users list to all users
-                let usernames = [];
-                for (let i = 0; i < users.length; i++) {
-                  usernames.push(users[i].username);
-                }
+
                 io.sockets
                   .in(roomName)
-                  .emit("users", { users: usernames, room: roomName });
-
-                
+                  .emit("users", {
+                    users: users.map(a => a.username),
+                    room: roomName
+                  });
               });
             });
-          
+          });
         });
-      });
 
         //on chat message
         socket.on("chat", chat => {

@@ -3,7 +3,7 @@
     <a href="/account/logout">Logout</a>
     <table id="rooms-table">
       <tr>
-        <td>
+        <td id="rooms-col">
           <room-component
             v-show="join == sel"
             v-for="join in joined"

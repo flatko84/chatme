@@ -15,7 +15,7 @@ table, td {
 
 }
 
-.chatroom {
+.chatroom, #rooms-col {
   border: 1;
   height: 700px;
   width: 700px;

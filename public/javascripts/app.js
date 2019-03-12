@@ -20760,7 +20760,7 @@ module.exports = {
 if (module.exports.__esModule) module.exports = module.exports.default
 var __vue__options__ = (typeof module.exports === "function"? module.exports.options: module.exports)
 if (__vue__options__.functional) {console.error("[vueify] functional components are not supported and should be defined in plain js files using render functions.")}
-__vue__options__.render = function render () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('a',{attrs:{"href":"/account/logout"}},[_vm._v("Logout")]),_vm._v(" "),_c('table',{attrs:{"id":"rooms-table"}},[_c('tr',[_c('td',_vm._l((_vm.joined),function(join){return _c('room-component',{directives:[{name:"show",rawName:"v-show",value:(join == _vm.sel),expression:"join == sel"}],key:join,attrs:{"roomname":join}})}),1),_vm._v(" "),_c('td',[_vm._l((_vm.rooms),function(room){return _c('div',{key:room},[_c('a',{class:{bld: room == _vm.sel},on:{"click":function($event){return _vm.joinRoom(room)}}},[_vm._v(_vm._s(room))]),_vm._v(" "),(_vm.joined.includes(room))?_c('input',{attrs:{"type":"button","value":"X"},on:{"click":function($event){return _vm.leaveRoom(room)}}}):_vm._e(),_vm._v(" "),_c('br')])}),_vm._v(" "),_c('br'),_vm._v("Name:\n        "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.createRoomName),expression:"createRoomName"}],attrs:{"type":"text"},domProps:{"value":(_vm.createRoomName)},on:{"input":function($event){if($event.target.composing){ return; }_vm.createRoomName=$event.target.value}}}),_vm._v(" "),_c('input',{attrs:{"type":"button","value":"New"},on:{"click":_vm.newRoom}})],2)])])])}
+__vue__options__.render = function render () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('a',{attrs:{"href":"/account/logout"}},[_vm._v("Logout")]),_vm._v(" "),_c('table',{attrs:{"id":"rooms-table"}},[_c('tr',[_c('td',{attrs:{"id":"rooms-col"}},_vm._l((_vm.joined),function(join){return _c('room-component',{directives:[{name:"show",rawName:"v-show",value:(join == _vm.sel),expression:"join == sel"}],key:join,attrs:{"roomname":join}})}),1),_vm._v(" "),_c('td',[_vm._l((_vm.rooms),function(room){return _c('div',{key:room},[_c('a',{class:{bld: room == _vm.sel},on:{"click":function($event){return _vm.joinRoom(room)}}},[_vm._v(_vm._s(room))]),_vm._v(" "),(_vm.joined.includes(room))?_c('input',{attrs:{"type":"button","value":"X"},on:{"click":function($event){return _vm.leaveRoom(room)}}}):_vm._e(),_vm._v(" "),_c('br')])}),_vm._v(" "),_c('br'),_vm._v("Name:\n        "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.createRoomName),expression:"createRoomName"}],attrs:{"type":"text"},domProps:{"value":(_vm.createRoomName)},on:{"input":function($event){if($event.target.composing){ return; }_vm.createRoomName=$event.target.value}}}),_vm._v(" "),_c('input',{attrs:{"type":"button","value":"New"},on:{"click":_vm.newRoom}})],2)])])])}
 __vue__options__.staticRenderFns = []
 if (module.hot) {(function () {  var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -20778,8 +20778,7 @@ var VueSocketIO = require('vue-socket.io');
 
 Vue.use(new VueSocketIO({
     debug: true,
-    connection: 'http://localhost:3000',
-    //options: { path: "/my-app/" } //Optional options
+    connection: 'http://localhost:3000'
 }))
 
 Vue.component('room-component', require('./components/RoomComponent.vue'));
