@@ -8,7 +8,9 @@ const User = sequelize.define(
     username: Sequelize.TEXT,
     password: Sequelize.TEXT,
     salt: Sequelize.TEXT,
-    email: Sequelize.TEXT
+    email: Sequelize.TEXT,
+    socket_id: Sequelize.TEXT,
+    online: Sequelize.BOOLEAN
   },
   { timestamps: false }
 );

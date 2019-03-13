@@ -19,6 +19,19 @@ function ChatServer(server) {
       User.findOne({
         where: { username: socket.handshake.session.passport.user.username }
       }).then(user => {
+        user.update({socket_id: socket.id, online: 1});
+
+
+
+        socket.on("disconnect", function(){
+          user.update({online: 0});
+          user.getRooms().then(rooms => {
+            for (let i=0; i<rooms.length;i++){
+              console.log(rooms[i].name);
+              socket.in(rooms[i].name).emit("userOffline", user.username);
+            }
+          });
+        });
         //send rooms and joined rooms list on loading page
         socket.on("getRooms", () => {
           Room.findAll()
@@ -35,7 +48,7 @@ function ChatServer(server) {
         //on joining room - to do - sanitize input room name - not blank and allowed characters
         socket.on("join", roomName => {
           //create room if not present
-          Room.findOrCreate({ where: { name: roomName } }).spread(
+          Room.findOrCreate({ where: { name: roomName }, defaults: {open: 1} }).spread(
             (room, created) => {
               //add user to room
               user.addRoom(room).then(() => {
@@ -45,7 +58,7 @@ function ChatServer(server) {
 
                   //send users list to room users
                   io.sockets.in(roomName).emit("users", {
-                    users: users.map(a => a.username),
+                    users: users,
                     room: roomName
                   });
 
@@ -75,7 +88,7 @@ function ChatServer(server) {
                 //send users list to room users
 
                 io.sockets.in(roomName).emit("users", {
-                  users: users.map(a => a.username),
+                  users: users,
                   room: roomName
                 });
                 //emit rooms to all
@@ -87,6 +100,38 @@ function ChatServer(server) {
           });
         });
 
+         //private message
+         socket.on("pm", targetName => {
+           let roomName = "pm-" + user.username + "-" + targetName;
+          //create private room if not present, Open is 0
+          Room.findOrCreate({ where: { name: roomName }, defaults: { open: 0 } }).spread(
+            (room, created) => {
+              //add users to private room
+              user.addRoom(room).then(() => {
+                User.findOne({where: {username: targetName}}).then( (target) => {
+                  io.to(`${socket.id}`).emit("pm", roomName);
+                  io.to(`${target.socket_id}`).emit("pm", roomName);
+                room.getUsers().then(users => {
+                  //join socket to room
+                  socket.join(roomName);
+
+                  //send users list to room users
+                  io.sockets.in(roomName).emit("users", {
+                    users: users,
+                    room: roomName
+                  });
+
+                  //emit rooms to all
+                  Room.findAll().then(rooms => {
+                    io.of("/").emit("rooms", rooms.map(a => a.name));
+                  });
+                })
+               });
+              });
+            }
+          );
+        });
+
         //on chat message
         socket.on("chat", chat => {
           //send message to the chat room
@@ -96,6 +141,8 @@ function ChatServer(server) {
             room: chat.roomName
           });
         });
+
+
       });
     }
   });

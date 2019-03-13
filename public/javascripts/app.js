@@ -20652,6 +20652,11 @@ module.exports = {
       if (chat.room == this.roomname) {
         this.messages.push({ user: chat.user, message: chat.message });
       }
+    },
+    userOffline: function(username){
+      let index = this.users.findIndex(user => user.username == username);
+
+      this.users[index].online = 0;
     }
   },
   methods: {
@@ -20661,6 +20666,9 @@ module.exports = {
         message: this.newMessage
       });
       this.newMessage = "";
+    },
+    pm(username) {
+        this.$socket.emit("pm", username);
     }
   },
   created() {
@@ -20672,7 +20680,7 @@ module.exports = {
 if (module.exports.__esModule) module.exports = module.exports.default
 var __vue__options__ = (typeof module.exports === "function"? module.exports.options: module.exports)
 if (__vue__options__.functional) {console.error("[vueify] functional components are not supported and should be defined in plain js files using render functions.")}
-__vue__options__.render = function render () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('table',{staticClass:"chatroom"},[_c('tr',[_c('td',[_c('div',{attrs:{"id":"feed"}},_vm._l((_vm.messages),function(message){return _c('div',{key:message},[_vm._v(_vm._s(message.user)+": "+_vm._s(message.message))])}),0),_vm._v(" "),_c('form',{attrs:{"id":"message-bar"},on:{"submit":function($event){$event.preventDefault();return _vm.sendMessage($event)}}},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.newMessage),expression:"newMessage"}],attrs:{"type":"text"},domProps:{"value":(_vm.newMessage)},on:{"input":function($event){if($event.target.composing){ return; }_vm.newMessage=$event.target.value}}}),_vm._v(" "),_c('input',{attrs:{"type":"submit","value":"Send"}})])]),_vm._v(" "),_c('td',_vm._l((_vm.users),function(user){return _c('div',{key:user},[_vm._v(_vm._s(user))])}),0)])])])}
+__vue__options__.render = function render () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('table',{staticClass:"chatroom"},[_c('tr',[_c('td',[_c('div',{attrs:{"id":"feed"}},_vm._l((_vm.messages),function(message){return _c('div',{key:message},[_vm._v(_vm._s(message.user)+": "+_vm._s(message.message))])}),0),_vm._v(" "),_c('form',{attrs:{"id":"message-bar"},on:{"submit":function($event){$event.preventDefault();return _vm.sendMessage($event)}}},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.newMessage),expression:"newMessage"}],attrs:{"type":"text"},domProps:{"value":(_vm.newMessage)},on:{"input":function($event){if($event.target.composing){ return; }_vm.newMessage=$event.target.value}}}),_vm._v(" "),_c('input',{attrs:{"type":"submit","value":"Send"}})])]),_vm._v(" "),_c('td',_vm._l((_vm.users),function(user){return _c('div',{key:user.username},[_c('a',{class:{online: user.online == true, offline: user.online == false},on:{"click":function($event){return _vm.pm(user.username)}}},[_vm._v(_vm._s(user.username))])])}),0)])])])}
 __vue__options__.staticRenderFns = []
 if (module.hot) {(function () {  var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -20731,6 +20739,9 @@ module.exports = {
     },
     joined: function(joined) {
       this.joined = joined;
+    },
+    pm: function(roomName){
+      this.joined.push(roomName);
     }
   },
   methods: {

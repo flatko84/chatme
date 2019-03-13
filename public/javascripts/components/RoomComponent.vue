@@ -15,7 +15,7 @@
           </form>
         </td>
         <td>
-          <div v-for="user in users" v-bind:key="user">{{ user }}</div>
+          <div v-for="user in users" v-bind:key="user.username"><a @click="pm(user.username)" v-bind:class="{online: user.online == true, offline: user.online == false}">{{ user.username }}</a></div>
         </td>
       </tr>
     </table>
@@ -43,6 +43,11 @@ module.exports = {
       if (chat.room == this.roomname) {
         this.messages.push({ user: chat.user, message: chat.message });
       }
+    },
+    userOffline: function(username){
+      let index = this.users.findIndex(user => user.username == username);
+
+      this.users[index].online = 0;
     }
   },
   methods: {
@@ -52,6 +57,9 @@ module.exports = {
         message: this.newMessage
       });
       this.newMessage = "";
+    },
+    pm(username) {
+        this.$socket.emit("pm", username);
     }
   },
   created() {

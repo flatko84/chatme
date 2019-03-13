@@ -43,6 +43,9 @@ module.exports = {
     },
     joined: function(joined) {
       this.joined = joined;
+    },
+    pm: function(roomName){
+      this.joined.push(roomName);
     }
   },
   methods: {
