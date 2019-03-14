@@ -38,8 +38,11 @@ module.exports = {
     };
   },
   sockets: {
-    rooms: function(rms) {
-      this.rooms = rms;
+    roomAdded: function(roomName) {
+      this.rooms.push(roomName);
+    },
+    roomRemoved: function (roomName) {
+      let index = this.users.findIndex(node => node == roomName);
     },
     joined: function(joined) {
       this.joined = joined;

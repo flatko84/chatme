@@ -19,16 +19,18 @@ function ChatServer(server) {
       User.findOne({
         where: { username: socket.handshake.session.passport.user.username }
       }).then(user => {
-        user.update({socket_id: socket.id, online: 1});
+        user.update({ socket_id: socket.id, online: 1 });
+        user.getRooms().then(rooms => {
+          for (let i = 0; i < rooms.length; i++) {
+            socket.in(rooms[i].name).emit("userStatus", {username: user.username, status: 1});
+          }
+        });
 
-
-
-        socket.on("disconnect", function(){
-          user.update({online: 0});
+        socket.on("disconnect", function() {
+          user.update({ online: 0 });
           user.getRooms().then(rooms => {
-            for (let i=0; i<rooms.length;i++){
-              console.log(rooms[i].name);
-              socket.in(rooms[i].name).emit("userOffline", user.username);
+            for (let i = 0; i < rooms.length; i++) {
+              socket.in(rooms[i].name).emit("userStatus", {username: user.username, status: 0});
             }
           });
         });
@@ -48,28 +50,27 @@ function ChatServer(server) {
         //on joining room - to do - sanitize input room name - not blank and allowed characters
         socket.on("join", roomName => {
           //create room if not present
-          Room.findOrCreate({ where: { name: roomName }, defaults: {open: 1} }).spread(
-            (room, created) => {
-              //add user to room
-              user.addRoom(room).then(() => {
-                room.getUsers().then(users => {
-                  //join socket to room
-                  socket.join(roomName);
+          Room.findOrCreate({
+            where: { name: roomName },
+            defaults: { open: 1 }
+          }).spread((room, created) => {
+            if (created){
+            io.of("/").emit("roomAdded", roomName);
+            }
+            //add user to room
+            user.addRoom(room).then(() => {
+              room.getUsers().then(users => {
+                //join socket to room
+                socket.join(roomName);
 
-                  //send users list to room users
-                  io.sockets.in(roomName).emit("users", {
-                    users: users,
-                    room: roomName
-                  });
-
-                  //emit rooms to all
-                  Room.findAll().then(rooms => {
-                    io.of("/").emit("rooms", rooms.map(a => a.name));
-                  });
+                //send users list to room users
+                io.sockets.in(roomName).emit("userJoined", {
+                  user: user,
+                  room: roomName
                 });
               });
-            }
-          );
+            });
+          });
         });
 
         //on leaving room
@@ -80,56 +81,50 @@ function ChatServer(server) {
             user.removeRoom(room).then(() => {
               //leave room from socket
               socket.leave(roomName);
-              room.getUsers().then(users => {
-                //delete room if no users are left
-                if (users.length == 0) {
-                  room.destroy();
-                }
-                //send users list to room users
-
-                io.sockets.in(roomName).emit("users", {
-                  users: users,
-                  room: roomName
-                });
-                //emit rooms to all
-                Room.findAll().then(rooms => {
-                  io.of("/").emit("rooms", rooms.map(a => a.name));
-                });
+              room.getUsers().then( users => {
+              //delete room if no users are left
+              if (users.length == 0) {
+                room.destroy();
+                io.of("/").emit("roomRemoved", roomName);
+              }
+              //send users list to room users
+            })
+            console.log(user);
+              io.sockets.in(roomName).emit("userLeft", {
+                user: user,
+                room: roomName
               });
             });
           });
         });
 
-         //private message
-         socket.on("pm", targetName => {
-           let roomName = "pm-" + user.username + "-" + targetName;
+        //private message
+        socket.on("pm", targetName => {
+          let roomName = "pm-" + user.username + "-" + targetName;
           //create private room if not present, Open is 0
-          Room.findOrCreate({ where: { name: roomName }, defaults: { open: 0 } }).spread(
-            (room, created) => {
-              //add users to private room
-              user.addRoom(room).then(() => {
-                User.findOne({where: {username: targetName}}).then( (target) => {
-                  io.to(`${socket.id}`).emit("pm", roomName);
-                  io.to(`${target.socket_id}`).emit("pm", roomName);
+          Room.findOrCreate({
+            where: { name: roomName },
+            defaults: { open: 0 }
+          }).spread((room, created) => {
+            io.of("/").emit("roomAdded", roomName);
+            //add users to private room
+            user.addRoom(room).then(() => {
+              User.findOne({ where: { username: targetName } }).then(target => {
+                io.to(`${socket.id}`).emit("pm", roomName);
+                io.to(`${target.socket_id}`).emit("pm", roomName);
                 room.getUsers().then(users => {
                   //join socket to room
                   socket.join(roomName);
 
                   //send users list to room users
-                  io.sockets.in(roomName).emit("users", {
-                    users: users,
+                  io.sockets.in(roomName).emit("userJoined", {
+                    user: user,
                     room: roomName
                   });
-
-                  //emit rooms to all
-                  Room.findAll().then(rooms => {
-                    io.of("/").emit("rooms", rooms.map(a => a.name));
-                  });
-                })
-               });
+                });
               });
-            }
-          );
+            });
+          });
         });
 
         //on chat message
@@ -141,8 +136,6 @@ function ChatServer(server) {
             room: chat.roomName
           });
         });
-
-
       });
     }
   });

@@ -15,7 +15,12 @@
           </form>
         </td>
         <td>
-          <div v-for="user in users" v-bind:key="user.username"><a @click="pm(user.username)" v-bind:class="{online: user.online == true, offline: user.online == false}">{{ user.username }}</a></div>
+          <div v-for="user in users" v-bind:key="user.username">
+            <a
+              @click="pm(user.username)"
+              v-bind:class="{online: user.online == true, offline: user.online == false}"
+            >{{ user.username }}</a>
+          </div>
         </td>
       </tr>
     </table>
@@ -24,7 +29,7 @@
 
 <script>
 module.exports = {
-    //users = all users in the room, messages = all messages sent to the room, newMessage = message field
+  //users = all users in the room, messages = all messages sent to the room, newMessage = message field
   props: ["roomname"],
   data() {
     return {
@@ -34,20 +39,28 @@ module.exports = {
     };
   },
   sockets: {
-    users: function(usr) {
-      if (usr.room == this.roomname) {
-        this.users = usr.users;
+    userJoined: function(message) {
+      if (message.room == this.roomname) {
+        this.users.push(message.user);
       }
+    },
+    userLeft: function(message) {
+      let index = this.users.findIndex(
+        node => node.username == message.user.username
+      );
+      this.users.splice(index, 1);
     },
     chat: function(chat) {
       if (chat.room == this.roomname) {
         this.messages.push({ user: chat.user, message: chat.message });
       }
     },
-    userOffline: function(username){
-      let index = this.users.findIndex(user => user.username == username);
+    userStatus: function(message) {
+      let index = this.users.findIndex(
+        node => node.username == message.user.username
+      );
 
-      this.users[index].online = 0;
+      this.users[index].online = message.status;
     }
   },
   methods: {
@@ -59,7 +72,7 @@ module.exports = {
       this.newMessage = "";
     },
     pm(username) {
-        this.$socket.emit("pm", username);
+      this.$socket.emit("pm", username);
     }
   },
   created() {

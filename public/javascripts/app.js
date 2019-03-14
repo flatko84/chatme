@@ -20631,9 +20631,14 @@ if (process.env.NODE_ENV === 'production') {
 //
 //
 //
+//
+//
+//
+//
+//
 
 module.exports = {
-    //users = all users in the room, messages = all messages sent to the room, newMessage = message field
+  //users = all users in the room, messages = all messages sent to the room, newMessage = message field
   props: ["roomname"],
   data() {
     return {
@@ -20643,20 +20648,28 @@ module.exports = {
     };
   },
   sockets: {
-    users: function(usr) {
-      if (usr.room == this.roomname) {
-        this.users = usr.users;
+    userJoined: function(message) {
+      if (message.room == this.roomname) {
+        this.users.push(message.user);
       }
+    },
+    userLeft: function(message) {
+      let index = this.users.findIndex(
+        node => node.username == message.user.username
+      );
+      this.users.splice(index, 1);
     },
     chat: function(chat) {
       if (chat.room == this.roomname) {
         this.messages.push({ user: chat.user, message: chat.message });
       }
     },
-    userOffline: function(username){
-      let index = this.users.findIndex(user => user.username == username);
+    userStatus: function(message) {
+      let index = this.users.findIndex(
+        node => node.username == message.user.username
+      );
 
-      this.users[index].online = 0;
+      this.users[index].online = message.status;
     }
   },
   methods: {
@@ -20668,7 +20681,7 @@ module.exports = {
       this.newMessage = "";
     },
     pm(username) {
-        this.$socket.emit("pm", username);
+      this.$socket.emit("pm", username);
     }
   },
   created() {
@@ -20734,8 +20747,11 @@ module.exports = {
     };
   },
   sockets: {
-    rooms: function(rms) {
-      this.rooms = rms;
+    roomAdded: function(roomName) {
+      this.rooms.push(roomName);
+    },
+    roomRemoved: function (roomName) {
+      let index = this.users.findIndex(node => node == roomName);
     },
     joined: function(joined) {
       this.joined = joined;
