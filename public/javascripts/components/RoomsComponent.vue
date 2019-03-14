@@ -38,16 +38,21 @@ module.exports = {
     };
   },
   sockets: {
+    rooms: function(rooms) {
+      this.rooms = rooms;
+    },
     roomAdded: function(roomName) {
       this.rooms.push(roomName);
     },
-    roomRemoved: function (roomName) {
-      let index = this.users.findIndex(node => node == roomName);
+    roomRemoved: function(roomName) {
+      let index = this.rooms.findIndex(node => node == roomName);
+      this.rooms.splice(index,1);
     },
     joined: function(joined) {
       this.joined = joined;
     },
-    pm: function(roomName){
+    pm: function(roomName) {
+      this.rooms.push(roomName);
       this.joined.push(roomName);
     }
   },

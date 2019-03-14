@@ -39,6 +39,11 @@ module.exports = {
     };
   },
   sockets: {
+    users: function (message){
+      if (message.room == this.roomname) {
+        this.users = message.users;
+      }
+    },
     userJoined: function(message) {
       if (message.room == this.roomname) {
         this.users.push(message.user);
@@ -57,7 +62,7 @@ module.exports = {
     },
     userStatus: function(message) {
       let index = this.users.findIndex(
-        node => node.username == message.user.username
+        node => node.username == message.username
       );
 
       this.users[index].online = message.status;
