@@ -6,7 +6,8 @@ const Room = sequelize.define(
   {
     room_id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
     name: Sequelize.TEXT,
-    open: Sequelize.BOOLEAN
+    open: Sequelize.BOOLEAN,
+    token: Sequelize.TEXT
   },
   { timestamps: false }
 );

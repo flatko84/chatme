@@ -30,7 +30,7 @@
 <script>
 module.exports = {
   //users = all users in the room, messages = all messages sent to the room, newMessage = message field
-  props: ["roomname"],
+  props: ["roomname", "token"],
   data() {
     return {
       users: [],
@@ -81,7 +81,7 @@ module.exports = {
     }
   },
   created() {
-    this.$socket.emit("join", this.roomname);
+    this.$socket.emit("join", {roomName: this.roomname, token: this.token});
   }
 };
 </script>

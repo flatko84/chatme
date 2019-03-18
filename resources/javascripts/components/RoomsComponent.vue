@@ -13,7 +13,7 @@
         </td>
         <td>
           <div v-for="room in rooms" v-bind:key="room">
-            <a v-bind:class="{bld: room == sel}" @click="joinRoom(room)">{{ room }}</a>
+            <a v-bind:class="{bld: room == sel}" @click="selectRoom(room)">{{ room }}</a>
             <input v-if="joined.includes(room)" type="button" value="X" @click="leaveRoom(room)">
             <br>
           </div>
@@ -41,15 +41,22 @@ module.exports = {
     rooms: function(rooms) {
       this.rooms = rooms;
     },
-    roomAdded: function(roomName) {
-      this.rooms.push(roomName);
+    roomAdded: function(room) {
+      if (!this.rooms.includes(room.roomName)){
+      this.rooms.push(room.roomName);
+      }
     },
     roomRemoved: function(roomName) {
       let index = this.rooms.findIndex(node => node == roomName);
       this.rooms.splice(index,1);
     },
-    joined: function(joined) {
-      this.joined = joined;
+    roomJoined: function(roomName) {
+      if (!this.rooms.includes(roomName)){
+      this.rooms.push(roomName);}
+      if (!this.joined.includes(roomName)) {
+      this.joined.push(roomName);
+      }
+      this.sel = roomName;
     },
     pm: function(roomName) {
       this.rooms.push(roomName);
@@ -58,17 +65,14 @@ module.exports = {
   },
   methods: {
     newRoom() {
-      if (!this.joined.includes(this.createRoomName)) {
-        this.joined.push(this.createRoomName);
-      }
-      this.sel = this.createRoomName;
+      this.$socket.emit("create", {roomName: this.createRoomName, token: '', open: 1});
       this.createRoomName = "";
     },
-    joinRoom(name) {
-      if (!this.joined.includes(name)) {
-        this.joined.push(name);
-      }
-      this.sel = name;
+    selectRoom(roomName){
+      if (!this.joined.includes(roomName)) {
+      this.joined.push(roomName);
+      };
+      this.sel = roomName;
     },
     leaveRoom(roomname) {
       this.$socket.emit("leave", roomname);

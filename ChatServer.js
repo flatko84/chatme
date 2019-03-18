@@ -57,32 +57,46 @@ function ChatServer(server) {
             );
         });
 
-        //on joining room - to do - sanitize input room name - not blank and allowed characters
-        socket.on("join", roomName => {
-          //create room if not present
+        //create room and return event on success
+        socket.on("create", crRoom => {
           Room.findOrCreate({
-            where: { name: roomName },
-            defaults: { open: 1 }
+            where: { name: crRoom.roomName },
+            defaults: {
+              open: crRoom.open,
+              token: crRoom.token
+            }
           }).spread((room, created) => {
             if (created) {
-              io.of("/").emit("roomAdded", roomName);
+              
+              io.to(`${socket.id}`).emit("roomJoined", room.name);
+              if (room.open == 1){
+              io.of("/").emit("roomAdded", {roomId: room.room_id, roomName: room.name});
+              }
             }
-            //add user to room
-            user.addRoom(room).then(() => {
-              room.getUsers().then(users => {
-                //join socket to room
-                socket.join(roomName);
-                //notify all in the room for new user
-                io.sockets.in(roomName).emit("users", {
-                  users: users,
-                  room: roomName
-                });
-              });
-            });
           });
         });
 
-        //on leaving room
+        //join room
+        socket.on("join", jnRoom => {
+          Room.findOne({where: { name: jnRoom.roomName }}).then(room => {
+            if (room.open == 1 || jnRoom.token == room.token){
+            //add user to room
+            user.addRoom(room).then(() => {
+              room.getUsers({attributes: ['username', 'online']}).then(users => {
+                //join socket to room
+                socket.join(room.name);
+                //notify all in the room for new user
+                io.sockets.in(room.name).emit("users", {
+                  users: users,
+                  room: room.name
+                });
+              });
+            });
+          }
+          });
+        });
+
+        //leave room
         socket.on("leave", roomName => {
           //get the room
           Room.findOne({ where: { name: roomName } }).then(room => {
