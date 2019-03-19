@@ -10,6 +10,7 @@
             v-bind:key="join.room_id"
             :roomid="join.room_id"
             :roomname="join.name"
+            :token="join.token"
           ></room-component>
         </td>
         <td>
@@ -44,7 +45,9 @@ module.exports = {
     },
     joined: function(rooms) {
       this.joined = rooms;
+      if (rooms.length > 0){
       this.sel = rooms[0].room_id;
+      }
     },
     roomAdded: function(room) {
       if (this.rooms.findIndex(node => node.room_id == room.room_id) == -1){
