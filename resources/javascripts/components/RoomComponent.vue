@@ -30,7 +30,7 @@
 <script>
 module.exports = {
   //users = all users in the room, messages = all messages sent to the room, newMessage = message field
-  props: ["roomname", "token"],
+  props: ["roomname", "roomid", "token"],
   data() {
     return {
       users: [],
@@ -56,7 +56,7 @@ module.exports = {
       this.users.splice(index, 1);
     },
     chat: function(chat) {
-      if (chat.room == this.roomname) {
+      if (chat.roomName == this.roomname) {
         this.messages.push({ user: chat.user, message: chat.message });
       }
     },

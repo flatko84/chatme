@@ -1,7 +1,7 @@
 var socket = require("socket.io");
 var ios = require("socket.io-express-session");
 var expSess = require("./session.js");
-var ev = require("./events.js");
+var crypto = require("crypto");
 var Room = require("./model/room.js");
 var User = require("./model/user.js");
 var UserRoom = require("./model/userroom.js");
@@ -44,21 +44,22 @@ function ChatServer(server) {
         //send rooms and joined rooms list on loading page
         socket.on("getRooms", () => {
           Room.findAll({ where: { open: 1 } })
-            .then(rooms => {
+            .then(openRooms => {
               user.getRooms({ where: { open: 0 } }).then(closedRooms => {
-                result = rooms.concat(closedRooms);
-                io.to(`${socket.id}`).emit("rooms", result.map(a => a.name));
+                rooms = openRooms.concat(closedRooms);
+                io.to(`${socket.id}`).emit("rooms", rooms);
               });
             })
             .then(
-              user.getRooms().then(rooms => {
-                io.to(`${socket.id}`).emit("joined", rooms.map(a => a.name));
+              user.getRooms().then(jnRooms => {
+                io.to(`${socket.id}`).emit("joined", jnRooms);
               })
             );
         });
 
         //create room and return event on success
         socket.on("create", crRoom => {
+          
           Room.findOrCreate({
             where: { name: crRoom.roomName },
             defaults: {
@@ -68,9 +69,9 @@ function ChatServer(server) {
           }).spread((room, created) => {
             if (created) {
               
-              io.to(`${socket.id}`).emit("roomJoined", room.name);
+              io.to(`${socket.id}`).emit("roomJoined", room);
               if (room.open == 1){
-              io.of("/").emit("roomAdded", {roomId: room.room_id, roomName: room.name});
+              io.of("/").emit("roomAdded", room);
               }
             }
           });
@@ -115,7 +116,7 @@ function ChatServer(server) {
                     (users.length <= 1 && room.open == 0)
                   ) {
                     room.destroy();
-                    io.of("/").emit("roomRemoved", roomName);
+                    io.of("/").emit("roomRemoved", room);
                   }
                   //send users list to room users
                 })
@@ -172,7 +173,7 @@ function ChatServer(server) {
           io.sockets.in(chat.roomName).emit("chat", {
             user: user.username,
             message: chat.message,
-            room: chat.roomName
+            roomName: chat.roomName
           });
         });
       });

@@ -5,16 +5,17 @@
       <tr>
         <td id="rooms-col">
           <room-component
-            v-show="join == sel"
+            v-show="join.room_id == sel"
             v-for="join in joined"
-            v-bind:key="join"
-            :roomname="join"
+            v-bind:key="join.room_id"
+            :roomid="join.room_id"
+            :roomname="join.name"
           ></room-component>
         </td>
         <td>
-          <div v-for="room in rooms" v-bind:key="room">
-            <a v-bind:class="{bld: room == sel}" @click="selectRoom(room)">{{ room }}</a>
-            <input v-if="joined.includes(room)" type="button" value="X" @click="leaveRoom(room)">
+          <div v-for="room in rooms" v-bind:key="room.room_id">
+            <a v-bind:class="{bld: room.room_id == sel}" @click="selectRoom(room)">{{ room.name }}</a>
+            <input v-if="joined.findIndex(node => node.room_id == room.room_id) != -1" type="button" value="X" @click="leaveRoom(room)">
             <br>
           </div>
           <br>Name:
@@ -41,22 +42,26 @@ module.exports = {
     rooms: function(rooms) {
       this.rooms = rooms;
     },
+    joined: function(rooms) {
+      this.joined = rooms;
+      this.sel = rooms[0].room_id;
+    },
     roomAdded: function(room) {
-      if (!this.rooms.includes(room.roomName)){
-      this.rooms.push(room.roomName);
+      if (this.rooms.findIndex(node => node.room_id == room.room_id) == -1){
+      this.rooms.push(room);
       }
     },
-    roomRemoved: function(roomName) {
-      let index = this.rooms.findIndex(node => node == roomName);
+    roomRemoved: function(room) {
+      let index = this.rooms.findIndex(node => node.room_id == room.room_id);
       this.rooms.splice(index,1);
     },
-    roomJoined: function(roomName) {
-      if (!this.rooms.includes(roomName)){
-      this.rooms.push(roomName);}
-      if (!this.joined.includes(roomName)) {
-      this.joined.push(roomName);
+    roomJoined: function(room) {
+      if (this.rooms.findIndex(node => node.room_id == room.room_id) == -1){
+      this.rooms.push(room);}
+      if (this.joined.findIndex(node => node.room_id == room.room_id) == -1) {
+      this.joined.push(room);
       }
-      this.sel = roomName;
+      this.sel = room.room_id;
     },
     pm: function(roomName) {
       this.rooms.push(roomName);
@@ -65,18 +70,18 @@ module.exports = {
   },
   methods: {
     newRoom() {
-      this.$socket.emit("create", {roomName: this.createRoomName, token: '', open: 1});
+      this.$socket.emit("create", {roomName: this.createRoomName, open: 1});
       this.createRoomName = "";
     },
-    selectRoom(roomName){
-      if (!this.joined.includes(roomName)) {
-      this.joined.push(roomName);
-      };
-      this.sel = roomName;
+    selectRoom(room){
+   if (this.joined.findIndex(node => node.room_id == room.room_id) == -1) {
+      this.joined.push(room);
+      }
+      this.sel = room.room_id;
     },
-    leaveRoom(roomname) {
-      this.$socket.emit("leave", roomname);
-      let idx = this.joined.indexOf(roomname);
+    leaveRoom(room) {
+      this.$socket.emit("leave", room.name);
+      let idx = this.joined.findIndex(node => node.room_id == room.room_id)
       this.joined.splice(idx, 1);
     }
   },

@@ -20639,7 +20639,7 @@ if (process.env.NODE_ENV === 'production') {
 
 module.exports = {
   //users = all users in the room, messages = all messages sent to the room, newMessage = message field
-  props: ["roomname", "token"],
+  props: ["roomname", "roomid", "token"],
   data() {
     return {
       users: [],
@@ -20665,7 +20665,7 @@ module.exports = {
       this.users.splice(index, 1);
     },
     chat: function(chat) {
-      if (chat.room == this.roomname) {
+      if (chat.roomName == this.roomname) {
         this.messages.push({ user: chat.user, message: chat.message });
       }
     },
@@ -20740,6 +20740,7 @@ if (module.hot) {(function () {  var hotAPI = require("vue-hot-reload-api")
 //
 //
 //
+//
 
 module.exports = {
   //rooms = all rooms, joined = all joined rooms by the user, sel = room currently selected for chat
@@ -20755,22 +20756,26 @@ module.exports = {
     rooms: function(rooms) {
       this.rooms = rooms;
     },
+    joined: function(rooms) {
+      this.joined = rooms;
+      this.sel = rooms[0].room_id;
+    },
     roomAdded: function(room) {
-      if (!this.rooms.includes(room.roomName)){
-      this.rooms.push(room.roomName);
+      if (this.rooms.findIndex(node => node.room_id == room.room_id) == -1){
+      this.rooms.push(room);
       }
     },
-    roomRemoved: function(roomName) {
-      let index = this.rooms.findIndex(node => node == roomName);
+    roomRemoved: function(room) {
+      let index = this.rooms.findIndex(node => node.room_id == room.room_id);
       this.rooms.splice(index,1);
     },
-    roomJoined: function(roomName) {
-      if (!this.rooms.includes(roomName)){
-      this.rooms.push(roomName);}
-      if (!this.joined.includes(roomName)) {
-      this.joined.push(roomName);
+    roomJoined: function(room) {
+      if (this.rooms.findIndex(node => node.room_id == room.room_id) == -1){
+      this.rooms.push(room);}
+      if (this.joined.findIndex(node => node.room_id == room.room_id) == -1) {
+      this.joined.push(room);
       }
-      this.sel = roomName;
+      this.sel = room.room_id;
     },
     pm: function(roomName) {
       this.rooms.push(roomName);
@@ -20782,15 +20787,15 @@ module.exports = {
       this.$socket.emit("create", {roomName: this.createRoomName, token: '', open: 1});
       this.createRoomName = "";
     },
-    selectRoom(roomName){
-      if (!this.joined.includes(roomName)) {
-      this.joined.push(roomName);
-      };
-      this.sel = roomName;
+    selectRoom(room){
+   if (this.joined.findIndex(node => node.room_id == room.room_id) == -1) {
+      this.joined.push(room);
+      }
+      this.sel = room.room_id;
     },
-    leaveRoom(roomname) {
-      this.$socket.emit("leave", roomname);
-      let idx = this.joined.indexOf(roomname);
+    leaveRoom(room) {
+      this.$socket.emit("leave", room.name);
+      let idx = this.joined.findIndex(node => node.room_id == room.room_id)
       this.joined.splice(idx, 1);
     }
   },
@@ -20803,7 +20808,7 @@ module.exports = {
 if (module.exports.__esModule) module.exports = module.exports.default
 var __vue__options__ = (typeof module.exports === "function"? module.exports.options: module.exports)
 if (__vue__options__.functional) {console.error("[vueify] functional components are not supported and should be defined in plain js files using render functions.")}
-__vue__options__.render = function render () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('a',{attrs:{"href":"/account/logout"}},[_vm._v("Logout")]),_vm._v(" "),_c('table',{attrs:{"id":"rooms-table"}},[_c('tr',[_c('td',{attrs:{"id":"rooms-col"}},_vm._l((_vm.joined),function(join){return _c('room-component',{directives:[{name:"show",rawName:"v-show",value:(join == _vm.sel),expression:"join == sel"}],key:join,attrs:{"roomname":join}})}),1),_vm._v(" "),_c('td',[_vm._l((_vm.rooms),function(room){return _c('div',{key:room},[_c('a',{class:{bld: room == _vm.sel},on:{"click":function($event){return _vm.selectRoom(room)}}},[_vm._v(_vm._s(room))]),_vm._v(" "),(_vm.joined.includes(room))?_c('input',{attrs:{"type":"button","value":"X"},on:{"click":function($event){return _vm.leaveRoom(room)}}}):_vm._e(),_vm._v(" "),_c('br')])}),_vm._v(" "),_c('br'),_vm._v("Name:\n        "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.createRoomName),expression:"createRoomName"}],attrs:{"type":"text"},domProps:{"value":(_vm.createRoomName)},on:{"input":function($event){if($event.target.composing){ return; }_vm.createRoomName=$event.target.value}}}),_vm._v(" "),_c('input',{attrs:{"type":"button","value":"New"},on:{"click":_vm.newRoom}})],2)])])])}
+__vue__options__.render = function render () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('a',{attrs:{"href":"/account/logout"}},[_vm._v("Logout")]),_vm._v(" "),_c('table',{attrs:{"id":"rooms-table"}},[_c('tr',[_c('td',{attrs:{"id":"rooms-col"}},_vm._l((_vm.joined),function(join){return _c('room-component',{directives:[{name:"show",rawName:"v-show",value:(join.room_id == _vm.sel),expression:"join.room_id == sel"}],key:join.room_id,attrs:{"roomid":join.room_id,"roomname":join.name}})}),1),_vm._v(" "),_c('td',[_vm._l((_vm.rooms),function(room){return _c('div',{key:room.room_id},[_c('a',{class:{bld: room.room_id == _vm.sel},on:{"click":function($event){return _vm.selectRoom(room)}}},[_vm._v(_vm._s(room.name))]),_vm._v(" "),(_vm.joined.findIndex(function (node) { return node.room_id == room.room_id; }) != -1)?_c('input',{attrs:{"type":"button","value":"X"},on:{"click":function($event){return _vm.leaveRoom(room)}}}):_vm._e(),_vm._v(" "),_c('br')])}),_vm._v(" "),_c('br'),_vm._v("Name:\n        "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.createRoomName),expression:"createRoomName"}],attrs:{"type":"text"},domProps:{"value":(_vm.createRoomName)},on:{"input":function($event){if($event.target.composing){ return; }_vm.createRoomName=$event.target.value}}}),_vm._v(" "),_c('input',{attrs:{"type":"button","value":"New"},on:{"click":_vm.newRoom}})],2)])])])}
 __vue__options__.staticRenderFns = []
 if (module.hot) {(function () {  var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
