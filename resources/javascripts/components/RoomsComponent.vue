@@ -56,7 +56,9 @@ module.exports = {
     },
     roomRemoved: function(room) {
       let index = this.rooms.findIndex(node => node.room_id == room.room_id);
+      if (index !== 'undefined'){
       this.rooms.splice(index,1);
+      }
     },
     roomJoined: function(room) {
       if (this.rooms.findIndex(node => node.room_id == room.room_id) == -1){

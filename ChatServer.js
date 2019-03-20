@@ -67,10 +67,9 @@ function ChatServer(server) {
             }
           }).spread((room, created) => {
             if (created) {
-              
               io.to(`${socket.id}`).emit("roomJoined", room);
-              if (room.open == 1){
-              io.of("/").emit("roomAdded", room);
+              if (room.open == 1) {
+                io.of("/").emit("roomAdded", room);
               }
             }
           });
@@ -78,21 +77,23 @@ function ChatServer(server) {
 
         //join room
         socket.on("join", jnRoom => {
-          Room.findOne({where: { name: jnRoom.roomName }}).then(room => {
-            if (room.open == 1 || jnRoom.token == room.token){
-            //add user to room
-            user.addRoom(room).then(() => {
-              room.getUsers({attributes: ['username', 'online']}).then(users => {
-                //join socket to room
-                socket.join(room.name);
-                //notify all in the room for new user
-                io.sockets.in(room.name).emit("users", {
-                  users: users,
-                  room: room.name
-                });
+          Room.findOne({ where: { name: jnRoom.roomName } }).then(room => {
+            if (room.open == 1 || jnRoom.token == room.token) {
+              //add user to room
+              user.addRoom(room).then(() => {
+                room
+                  .getUsers({ attributes: ["username", "online"] })
+                  .then(users => {
+                    //join socket to room
+                    socket.join(room.name);
+                    //notify all in the room for new user
+                    io.sockets.in(room.name).emit("users", {
+                      users: users,
+                      room: room.name
+                    });
+                  });
               });
-            });
-          }
+            }
           });
         });
 
@@ -104,18 +105,13 @@ function ChatServer(server) {
             user
               .removeRoom(room)
               .then(
-                //leave room from socket
-                socket.leave(roomName)
-              )
-              .then(
                 room.getUsers().then(users => {
                   //delete room if no users are left or if a single person is in a private chat
-                  if (
-                    users.length == 0 ||
-                    (users.length <= 1 && room.open == 0)
-                  ) {
+                  if (users.length == 0 || (users.length < 2 && room.open == 0)) {
+                    io.sockets.in(roomName).emit("roomRemoved", room);
+                    socket.leave(roomName);
+                    room.removeUsers();
                     room.destroy();
-                    io.of("/").emit("roomRemoved", room);
                   }
                   //send users list to room users
                 })
@@ -133,16 +129,19 @@ function ChatServer(server) {
         //private message as a closed room
         socket.on("pm", targetName => {
           if (user.username != targetName) {
-            
-            User.findOne({where: {username: targetName}}).then(target => {
-              Room.create({name: "PM-"+socket.id, open: 0, token: 'jkhkjhkjh'}).then(room => {
-                
-                io.to(`${socket.id}`).emit("roomAdded", room);
-                io.to(`${target.socket_id}`).emit("roomAdded", room);
-                io.to(`${socket.id}`).emit("roomJoined", room);
-                io.to(`${target.socket_id}`).emit("roomJoined", room);
-              })
-            })
+            //generate room name and token
+            let rName = crypto.randomBytes(16).toString("hex");
+            var token = crypto.randomBytes(64).toString("hex");
+            User.findOne({ where: { username: targetName } }).then(target => {
+              Room.create({ name: "PM-" + rName, open: 0, token: token }).then(
+                room => {
+                  io.to(`${socket.id}`).emit("roomAdded", room);
+                  io.to(`${target.socket_id}`).emit("roomAdded", room);
+                  io.to(`${socket.id}`).emit("roomJoined", room);
+                  io.to(`${target.socket_id}`).emit("roomJoined", room);
+                }
+              );
+            });
           }
         });
 
