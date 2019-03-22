@@ -50,10 +50,12 @@ module.exports = {
       }
     },
     userLeft: function(message) {
+      if (message.roomName == this.roomname){
       let index = this.users.findIndex(
         node => node.username == message.user.username
       );
       this.users.splice(index, 1);
+      }
     },
     chat: function(chat) {
       if (chat.roomName == this.roomname) {
